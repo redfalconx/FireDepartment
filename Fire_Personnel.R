@@ -1,12 +1,12 @@
 # Created by Andrew Russell, 2015.
 # These packages are used at various points: 
-# install.packages("RODBC", "data.table", "reshape2", xlsx", "dplyr", "tidyr", "ggplot2", "ggmap", "scales", "lubridate")
+# install.packages("RODBC", "data.table", "reshape2", "readxl", "dplyr", "tidyr", "ggplot2", "ggmap", "scales", "lubridate")
 
 # Load packages
 library(RODBC)
 library(data.table)
 library(reshape2)
-library(xlsx)
+library(readxl)
 library(ggplot2)
 library(dplyr) # data manipulation
 library(tidyr) # a few pivot-table functions
@@ -102,22 +102,30 @@ Injured$Reason <- ifelse(Injured$Total_Tours_Missed < 5, "Short-term Injured", "
 Personnel <- rbind(Sick, Injured)
 
 # Find the sum of shifts missed by month
-Sick_sum = dcast(Sick, year(Date_Out) + month(Date_Out) ~ Reason, value.var="Shifts", fun.aggregate=sum)
-Injured_sum = dcast(Injured, year(Date_Out) + month(Date_Out) ~ Reason, value.var="Shifts", fun.aggregate=sum)
-
-
 Sick_sum = Sick %>% 
-  group_by(year = year(Date_Out), month = month(Date_Out)) %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
   summarise(Total_Shifts = sum(Shifts)) %>%
+  spread(Reason, Total_Shifts, fill = 0) %>%
   arrange(year, month)
 
+Injured_sum = Injured %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Total_Shifts = sum(Shifts)) %>%
+  spread(Reason, Total_Shifts, fill = 0) %>%
+  arrange(year, month)
 
+# Take the count of the employees by short- and long-term by month
+Sick_count = Sick %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID)) %>%
+  spread(Reason, Count, fill = 0) %>%
+  arrange(year, month)
 
-# Take the count of the employees by short- and long-term
-Sick_Short_count = aggregate(Employee_ID ~ month(Date_Out) + year(Date_Out), data=Sick[Reason == "Short-term Sick"], FUN=function(x) length(unique(x)))
-Sick_Long_count = aggregate(Employee_ID ~ month(Date_Out) + year(Date_Out), data=Sick[Reason == "Long-term Sick"], FUN=function(x) length(unique(x)))
-Injured_Short_count = aggregate(Employee_ID ~ month(Date_Out) + year(Date_Out), data=Injured[Reason == "Short-term Injured"], FUN=function(x) length(unique(x)))
-Injured_Long_count = aggregate(Employee_ID ~ month(Date_Out) + year(Date_Out), data=Injured[Reason == "Long-term Injured"], FUN=function(x) length(unique(x)))
+Injured_count = Injured %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID)) %>%
+  spread(Reason, Count, fill = 0) %>%
+  arrange(year, month)
 
 # Take the count for specific dates. Replace the dates below.
 Sick_Short_count_yr = aggregate(Employee_ID ~ Reason, data=Sick[Reason == "Short-term Sick" & Date_Out >= as.POSIXct("2014-04-01") & Date_Out < as.POSIXct("2015-04-01")], FUN=function(x) length(unique(x)))
@@ -152,10 +160,18 @@ setcolorder(VacationTable, c("Record_ID","Employee_ID","Reason","Date_Out","Tota
 Personnel <- rbind(Personnel, VacationTable)
 
 # Find the sum of shifts missed by month
-Vacation_sum = dcast(VacationTable, year(Date_Out) + month(Date_Out) ~ Reason, value.var="Shifts", fun.aggregate=sum)
+Vacation_sum = VacationTable %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Total_Shifts = sum(Shifts)) %>%
+  spread(Reason, Total_Shifts, fill = 0) %>%
+  arrange(year, month)
 
 # Take the count of the employees
-Vacation_count = aggregate(Employee_ID ~ month(Date_Out) + year(Date_Out), data=VacationTable, FUN=function(x) length(unique(x)))
+Vacation_count = VacationTable %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID)) %>%
+  spread(Reason, Count, fill = 0) %>%
+  arrange(year, month)
 
 
 ### Fetch the Personal Days table from the database and put the results in a dataframe
@@ -185,9 +201,20 @@ PersonalDaysTable$Day <- weekdays(PersonalDaysTable$Date_Out)
 # Find the sum of shifts missed by month
 Personal_sum = dcast(PersonalDaysTable, year(Date_Out) + month(Date_Out) ~ Reason, value.var="Shifts", fun.aggregate=sum)
 
+Personal_sum = PersonalDaysTable %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Total_Shifts = sum(Shifts)) %>%
+  spread(Reason, Total_Shifts, fill = 0) %>%
+  arrange(year, month)
+
 # Take the count of the employees
 Personal_count = aggregate(Employee_ID ~ month(Date_Out) + year(Date_Out), data=PersonalDaysTable, FUN=function(x) length(unique(x)))
 
+Personal_count = PersonalDaysTable %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID)) %>%
+  spread(Reason, Count, fill = 0) %>%
+  arrange(year, month)
 
 # Add to Personnel
 Personnel <- rbind(Personnel, PersonalDaysTable)
@@ -199,17 +226,18 @@ close(channel)
 
 
 # Fetch the Vacation Weeks table from the Excel spreadsheet and put the results in a dataframe
-VacationWeeks <- read.xlsx("//fileshare1/Departments/Fire/FireStat/FireStat Workbook - Personnel and Budget.xlsx", sheetName = "Vacation Weeks")
+VacationWeeks <- read_excel("//fileshare1/Departments/Fire/FireStat/FireStat Workbook - Personnel and Budget.xlsx", "Vacation Weeks")
 
 # Include only necessary columns
 VacationWeeks <- VacationWeeks[, c(1,3,4)]
 
 # Make data.table
+VacationWeeks <- unclass(VacationWeeks)
 VacationWeeks <- as.data.table(VacationWeeks)
 
 # Format column names
-setnames(VacationWeeks, "Employee..", "Employee_ID")
-setnames(VacationWeeks, "Tour.Taken", "Date_Out")
+setnames(VacationWeeks, "Employee #", "Employee_ID")
+setnames(VacationWeeks, "Tour Taken", "Date_Out")
 
 # Add necessary columns
 VacationWeeks[, Record_ID := integer(.N)]
@@ -228,10 +256,19 @@ Personnel <- rbind(Personnel, VacationWeeks)
 write.csv(Personnel, file = "Personnel.csv")
 
 # Find the sum of shifts missed by month
-VacationWeeks_sum = dcast(VacationWeeks, year(Date_Out) + month(Date_Out) ~ Reason, value.var="Shifts", fun.aggregate=sum)
+VacationWeeks_sum = VacationWeeks %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Total_Shifts = sum(Shifts)) %>%
+  spread(Reason, Total_Shifts, fill = 0) %>%
+  arrange(year, month)
 
 # Take the count of the employees
-VacationWeeks_count = aggregate(Employee_ID ~ month(Date_Out) + year(Date_Out), data=VacationWeeks, FUN=function(x) length(unique(x)))
+VacationWeeks_count = VacationWeeks %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID)) %>%
+  spread(Reason, Count, fill = 0) %>%
+  arrange(year, month)
+
 
 
 # Calculate potential leave enhancement (PLE)
