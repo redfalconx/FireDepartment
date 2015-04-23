@@ -5,9 +5,8 @@
 # Load packages
 library(RODBC)
 library(data.table)
-library(reshape2)
+#library(reshape2)
 library(readxl)
-library(ggplot2)
 library(dplyr) # data manipulation
 library(tidyr) # a few pivot-table functions
 library(ggplot2) # plotting  
@@ -29,8 +28,8 @@ SickTable <- sqlFetch(channel, "Sick Table")
 SickTable <- SickTable[, 1:8]
 
 # Format column names & Time columns into H:M:S & Reason column
-names(SickTable) <- gsub(" ", "_", names(SickTable))
-names(SickTable) <- gsub("#", "ID", names(SickTable))
+setnames(SickTable, names(SickTable), gsub(" ", "_", names(SickTable)))
+setnames(SickTable, names(SickTable), gsub("#", "ID", names(SickTable)))
 SickTable$Time_Out2 <- format(SickTable$Time_Out, format = "%H:%M:%S")
 SickTable$Time_Return2 <- format(SickTable$Time_Return, format = "%H:%M:%S")
 SickTable$Reason[agrep("INJRY", SickTable$Reason)] <- "INJURED"
@@ -139,8 +138,8 @@ VacationTable <- sqlFetch(channel, "Vacation Tours")
 VacationTable <- as.data.table(VacationTable)
 
 # Format column names & Shift column
-names(VacationTable) <- gsub(" ", "_", names(VacationTable))
-names(VacationTable) <- gsub("#", "ID", names(VacationTable))
+setnames(VacationTable, names(VacationTable), gsub(" ", "_", names(VacationTable)))
+setnames(VacationTable, names(VacationTable), gsub("#", "ID", names(VacationTable)))
 setnames(VacationTable, "ID", "Record_ID")
 setnames(VacationTable, "Tour_Taken", "Date_Out")
 VacationTable$Shift[agrep(" DAY", VacationTable$Shift)] <- "DAY"
@@ -179,8 +178,8 @@ PersonalDaysTable <- sqlFetch(channel, "Personal Days")
 PersonalDaysTable <- as.data.table(PersonalDaysTable)
 
 # Format column names
-names(PersonalDaysTable) <- gsub(" ", "_", names(PersonalDaysTable))
-names(PersonalDaysTable) <- gsub("#", "ID", names(PersonalDaysTable))
+setnames(PersonalDaysTable, names(PersonalDaysTable), gsub(" ", "_", names(PersonalDaysTable)))
+setnames(PersonalDaysTable, names(PersonalDaysTable), gsub("#", "ID", names(PersonalDaysTable)))
 setnames(PersonalDaysTable, "ID", "Record_ID")
 setnames(PersonalDaysTable, "Tour_Taken", "Date_Out")
 
@@ -199,8 +198,6 @@ PersonalDaysTable$Shifts <- ifelse(PersonalDaysTable$Shift == "1/2 Day", 0.5,
 PersonalDaysTable$Day <- weekdays(PersonalDaysTable$Date_Out)
 
 # Find the sum of shifts missed by month
-Personal_sum = dcast(PersonalDaysTable, year(Date_Out) + month(Date_Out) ~ Reason, value.var="Shifts", fun.aggregate=sum)
-
 Personal_sum = PersonalDaysTable %>% 
   group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
   summarise(Total_Shifts = sum(Shifts)) %>%
@@ -208,8 +205,6 @@ Personal_sum = PersonalDaysTable %>%
   arrange(year, month)
 
 # Take the count of the employees
-Personal_count = aggregate(Employee_ID ~ month(Date_Out) + year(Date_Out), data=PersonalDaysTable, FUN=function(x) length(unique(x)))
-
 Personal_count = PersonalDaysTable %>% 
   group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
   summarise(Count = n_distinct(Employee_ID)) %>%
@@ -238,6 +233,9 @@ VacationWeeks <- as.data.table(VacationWeeks)
 # Format column names
 setnames(VacationWeeks, "Employee #", "Employee_ID")
 setnames(VacationWeeks, "Tour Taken", "Date_Out")
+
+# Format to Date class
+VacationWeeks$Date_Out <- as.Date(VacationWeeks$Date_Out, format = "%Y-%m-%d")
 
 # Add necessary columns
 VacationWeeks[, Record_ID := integer(.N)]
@@ -270,7 +268,6 @@ VacationWeeks_count = VacationWeeks %>%
   arrange(year, month)
 
 
-
 # Calculate potential leave enhancement (PLE)
 # (Taking a short-term sick day before or after another kind of leave)
 # Change to PLE and set order by Employee_ID then Date_Out
@@ -292,13 +289,18 @@ sum(PLE$PLE)
 write.csv(PLE, file = "Personnel.csv")
 
 # Find the sum of PLE by month
-PLE_sum = dcast(PLE, year(Date_Out) + month(Date_Out) ~ PLE, value.var="PLE", fun.aggregate=sum)
+PLE_sum = PLE %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out)) %>% 
+  summarise(Total_PLE = sum(PLE)) %>%
+  arrange(year, month)
 
 # Find the sum of all Reasons
-Personnel_sum = dcast(Personnel, year(Date_Out) + month(Date_Out) ~ Reason, value.var="Shifts", fun.aggregate=sum)
-names(Personnel_sum) <- gsub(" ", "_", names(Personnel_sum))
-names(Personnel_sum) <- gsub("-", "_", names(Personnel_sum))
-
+Personnel_sum = Personnel %>% 
+  group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
+  summarise(Total_Shifts = sum(Shifts)) %>%
+  spread(Reason, Total_Shifts, fill = 0) %>%
+  arrange(year, month)
+setnames(Personnel_sum, names(Personnel_sum), gsub(" |-", "_", names(Personnel_sum)))
 
 
 # Graph it!
