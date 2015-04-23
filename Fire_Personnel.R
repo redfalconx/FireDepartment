@@ -127,10 +127,37 @@ Injured_count = Injured %>%
   arrange(year, month)
 
 # Take the count for specific dates. Replace the dates below.
-Sick_Short_count_yr = aggregate(Employee_ID ~ Reason, data=Sick[Reason == "Short-term Sick" & Date_Out >= as.POSIXct("2014-04-01") & Date_Out < as.POSIXct("2015-04-01")], FUN=function(x) length(unique(x)))
-Sick_Long_count_yr = aggregate(Employee_ID ~ Reason, data=Sick[Reason == "Long-term Sick" & Date_Out >= as.POSIXct("2014-04-01") & Date_Out < as.POSIXct("2015-04-01")], FUN=function(x) length(unique(x)))
-Injured_Short_count_yr = aggregate(Employee_ID ~ Reason, data=Injured[Reason == "Short-term Injured" & Date_Out >= as.POSIXct("2014-04-01") & Date_Out < as.POSIXct("2015-04-01")], FUN=function(x) length(unique(x)))
-Injured_Long_count_yr = aggregate(Employee_ID ~ Reason, data=Injured[Reason == "Long-term Injured" & Date_Out >= as.POSIXct("2014-04-01") & Date_Out < as.POSIXct("2015-04-01")], FUN=function(x) length(unique(x)))
+# Current 12 months
+Sick_count_yr1 = Sick %>% 
+  filter(as.Date(Date_Out) >= ((Sys.Date()-365) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date_Out) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)) %>% 
+  group_by(Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID))
+# Prior 12 months
+Sick_count_yr2 = Sick %>% 
+  filter(as.Date(Date_Out) >= ((Sys.Date()-730) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date_Out) < (Sys.Date()-365 - as.POSIXlt(Sys.Date())$mday + 1)) %>% 
+  group_by(Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID))
+# Prior prior 12 months
+Sick_count_yr3 = Sick %>% 
+  filter(as.Date(Date_Out) >= ((Sys.Date()-1095) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date_Out) < (Sys.Date()-730 - as.POSIXlt(Sys.Date())$mday + 1)) %>% 
+  group_by(Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID))
+
+# Current 12 months
+Injured_count_yr1 = Injured %>% 
+  filter(as.Date(Date_Out) >= ((Sys.Date()-365) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date_Out) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)) %>% 
+  group_by(Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID))
+# Prior 12 months
+Injured_count_yr2 = Injured %>% 
+  filter(as.Date(Date_Out) >= ((Sys.Date()-730) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date_Out) < (Sys.Date()-365 - as.POSIXlt(Sys.Date())$mday + 1)) %>% 
+  group_by(Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID))
+# Prior prior 12 months
+Injured_count_yr3 = Injured %>% 
+  filter(as.Date(Date_Out) >= ((Sys.Date()-1095) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date_Out) < (Sys.Date()-730 - as.POSIXlt(Sys.Date())$mday + 1)) %>% 
+  group_by(Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID))
 
 
 ### Fetch the Vacation Tours from the database and put the results in a dataframe
