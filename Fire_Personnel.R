@@ -5,7 +5,6 @@
 # Load packages
 library(RODBC)
 library(data.table)
-#library(reshape2)
 library(readxl)
 library(dplyr) # data manipulation
 library(tidyr) # a few pivot-table functions
@@ -330,7 +329,7 @@ Personnel_sum = Personnel %>%
 setnames(Personnel_sum, names(Personnel_sum), gsub(" |-", "_", names(Personnel_sum)))
 
 
-# Graph it!
+# Plot it!
 lime_green = "#2ecc71"
 soft_blue = "#3498db"
 pinkish_red = "#e74c3c"
@@ -353,31 +352,30 @@ my.theme <-
 
 
 
-Personnel$Month <- as.Date(cut(Personnel$Date_Out,
-                         breaks = "month"))
+Personnel$Month <- as.Date(cut(Personnel$Date_Out, breaks = "month"))
 
-ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01")], aes(Month, Shifts)) +
+ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01")], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
 
-ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Short-term Sick"], aes(Month, Shifts)) +
+ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Short-term Sick"], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
 
-ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Long-term Sick"], aes(Month, Shifts)) +
+ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Long-term Sick"], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
 
-ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Short-term Injured"], aes(Month, Shifts)) +
+ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Short-term Injured"], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
 
-ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Long-term Injured"], aes(Month, Shifts)) +
+ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Long-term Injured"], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
 
-ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Personal Day"], aes(Month, Shifts)) +
+ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Personal Day"], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
 
-ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Vacation Day"], aes(Month, Shifts)) +
+ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Vacation Day"], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
 
-ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Vacation Week"], aes(Month, Shifts)) +
+ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Vacation Week"], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
 
 
