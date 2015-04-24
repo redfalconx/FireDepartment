@@ -1,6 +1,6 @@
 # Created by Andrew Russell, 2015.
 # These packages are used at various points: 
-# install.packages("RODBC", "data.table", "reshape2", "readxl", "dplyr", "tidyr", "ggplot2", "ggmap", "scales", "lubridate")
+# install.packages("RODBC", "data.table", "readxl", "dplyr", "tidyr", "ggplot2", "scales")
 
 # Load packages
 library(RODBC)
@@ -126,7 +126,7 @@ Injured_count = Injured %>%
   spread(Reason, Count, fill = 0) %>%
   arrange(year, month)
 
-# Take the count for specific dates. Replace the dates below.
+# Take the count for the last three 12-month periods
 # Current 12 months
 Sick_count_yr1 = Sick %>% 
   filter(as.Date(Date_Out) >= ((Sys.Date()-365) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date_Out) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)) %>% 
@@ -331,9 +331,55 @@ setnames(Personnel_sum, names(Personnel_sum), gsub(" |-", "_", names(Personnel_s
 
 
 # Graph it!
+lime_green = "#2ecc71"
+soft_blue = "#3498db"
+pinkish_red = "#e74c3c"
+purple = "#9b59b6"
+teele = "#1abc9c"
+nice_blue = "#2980b9"
+
+my.theme <- 
+  theme(#plot.background = element_rect(fill="white"), # Remove background
+    panel.grid.major = element_blank(), # Remove gridlines
+    # panel.grid.minor = element_blank(), # Remove more gridlines
+    # panel.border = element_blank(), # Remove border
+    # panel.background = element_blank(), # Remove more background
+    axis.ticks = element_blank(), # Remove axis ticks
+    axis.text=element_text(size=6), # Enlarge axis text font
+    axis.title=element_text(size=8), # Enlarge axis title font
+    plot.title=element_text(size=12) # Enlarge, left-align title
+    ,axis.text.x = element_text(angle=60, hjust = 1) # Uncomment if X-axis unreadable 
+  )
+
+
+
 Personnel$Month <- as.Date(cut(Personnel$Date_Out,
                          breaks = "month"))
 
-ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01")], aes(Month, Shifts)) + 
+ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01")], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
+
+ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Short-term Sick"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
+
+ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Long-term Sick"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
+
+ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Short-term Injured"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+
+ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Long-term Injured"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+
+ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Personal Day"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+
+ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Vacation Day"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+
+ggplot(Personnel[Date_Out > as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Vacation Week"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+
+
+
   
