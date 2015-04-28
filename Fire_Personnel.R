@@ -2,7 +2,7 @@
 # These packages are used at various points: 
 # install.packages("RODBC", "data.table", "readxl", "dplyr", "tidyr", "ggplot2", "scales")
 
-# Load packages
+#### Load packages ####
 library(RODBC)
 library(data.table)
 library(readxl)
@@ -20,7 +20,7 @@ channel <- odbcConnectAccess("//fileshare1/Departments/Fire/OFFICE/SFDRECORDS/SF
 # Find out what tables are available (Optional)
 # Tables <- sqlTables(channel)
 
-# Fetch the Sick Table from the database and put the results in a dataframe
+#### Fetch the Sick Table from the database and put the results in a dataframe ####
 SickTable <- sqlFetch(channel, "Sick Table")
 
 # Remove uneccesary columns
@@ -159,7 +159,7 @@ Injured_count_yr3 = Injured %>%
   summarise(Count = n_distinct(Employee_ID))
 
 
-### Fetch the Vacation Tours from the database and put the results in a dataframe
+#### Fetch the Vacation Tours from the database and put the results in a dataframe ####
 VacationTable <- sqlFetch(channel, "Vacation Tours")
 VacationTable <- as.data.table(VacationTable)
 
@@ -199,7 +199,7 @@ Vacation_count = VacationTable %>%
   arrange(year, month)
 
 
-### Fetch the Personal Days table from the database and put the results in a dataframe
+#### Fetch the Personal Days table from the database and put the results in a dataframe ####
 PersonalDaysTable <- sqlFetch(channel, "Personal Days")
 PersonalDaysTable <- as.data.table(PersonalDaysTable)
 
@@ -246,7 +246,7 @@ Personnel$Date_Out <- as.Date(Personnel$Date_Out, format = "%Y-%m-%d")
 close(channel)
 
 
-# Fetch the Vacation Weeks table from the Excel spreadsheet and put the results in a dataframe
+#### Fetch the Vacation Weeks table from the Excel spreadsheet and put the results in a dataframe ####
 VacationWeeks <- read_excel("//fileshare1/Departments/Fire/FireStat/FireStat Workbook - Personnel and Budget.xlsx", "Vacation Weeks")
 
 # Include only necessary columns
@@ -294,7 +294,7 @@ VacationWeeks_count = VacationWeeks %>%
   arrange(year, month)
 
 
-# Calculate potential leave enhancement (PLE)
+#### Calculate potential leave enhancement (PLE) ####
 # (Taking a short-term sick day before or after another kind of leave)
 # Change to PLE and set order by Employee_ID then Date_Out
 
@@ -329,7 +329,7 @@ Personnel_sum = Personnel %>%
 setnames(Personnel_sum, names(Personnel_sum), gsub(" |-", "_", names(Personnel_sum)))
 
 
-# Plot it!
+#### Plot it! ####
 lime_green = "#2ecc71"
 soft_blue = "#3498db"
 pinkish_red = "#e74c3c"

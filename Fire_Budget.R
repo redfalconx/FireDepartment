@@ -1,11 +1,10 @@
 # Created by Andrew Russell, 2015.
 # These packages are used at various points: 
-# install.packages("RODBC", "data.table", "readxl", "dplyr", "tidyr", "ggplot2", "scales")
+# install.packages("RODBC", "data.table", "dplyr", "tidyr", "ggplot2", "scales")
 
 # Load packages
 library(RODBC)
 library(data.table)
-library(readxl)
 library(dplyr) # data manipulation
 library(tidyr) # a few pivot-table functions
 library(ggplot2) # plotting  
@@ -20,7 +19,7 @@ channel <- odbcConnectAccess("//fileshare1/Departments/Fire/OFFICE/SFDRECORDS/SF
 # Find out what tables are available (Optional)
 # Tables <- sqlTables(channel)
 
-# Fetch the Sick Table from the database and put the results in a dataframe
+# Fetch the Overtime Query from the database and put the results in a dataframe
 Overtime <- sqlFetch(channel, "Cost Of Overtime w /ranks Query for Total Daily Hours")
 Overtime <- Overtime[complete.cases(Overtime),]
 Overtime <- as.data.table(Overtime)
@@ -73,8 +72,12 @@ Overtime_sum_Reasons = Overtime %>%
 Overtime$Month <- as.Date(cut(Overtime$Date, breaks = "month"))
 
 ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Cost)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + 
+  scale_x_date(breaks = pretty_breaks(10)) +
+  scale_y_continuous(labels = dollar) # This turns it back into $ money for the plot
 
 ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Cost)) +
-  stat_summary(fun.y = sum, geom = "bar", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
+  stat_summary(fun.y = sum, geom = "bar", aes(colour = Reason)) + 
+  scale_x_date(breaks = pretty_breaks(10)) + 
+  scale_y_continuous(labels = dollar) # This turns it back into $ money for the plot
 
