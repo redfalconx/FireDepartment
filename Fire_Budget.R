@@ -23,6 +23,7 @@ channel <- odbcConnectAccess("//fileshare1/Departments/Fire/OFFICE/SFDRECORDS/SF
 # Fetch the Sick Table from the database and put the results in a dataframe
 Overtime <- sqlFetch(channel, "Cost Of Overtime w /ranks Query for Total Daily Hours")
 Overtime <- Overtime[complete.cases(Overtime),]
+Overtime <- as.data.table(Overtime)
 
 # Format column names
 setnames(Overtime, names(Overtime), gsub(" ", "_", names(Overtime)))
@@ -52,6 +53,9 @@ Overtime$Reason[Overtime$Reason == 19] <- "Non-Grant Specific"
 Overtime$Reason[Overtime$Reason == 20] <- "Light Duty"
 Overtime$Reason[Overtime$Reason == 21] <- "Staff Meetings"
 
+# Closes the connection
+close(channel)
+
 # Get sum totals by month by reason
 Overtime_sum = Overtime %>% 
   group_by(year = year(Date), month = month(Date)) %>% 
@@ -68,5 +72,9 @@ Overtime_sum_Reasons = Overtime %>%
 # Plot it!
 Overtime$Month <- as.Date(cut(Overtime$Date, breaks = "month"))
 
-ggplot(Overtime[Date >= as.Date("2012-01-01") & Date < as.Date("2016-01-01")], aes(Month, Cost)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
+ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Cost)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
+
+ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Cost)) +
+  stat_summary(fun.y = sum, geom = "bar", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
+

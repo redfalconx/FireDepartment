@@ -354,29 +354,29 @@ my.theme <-
 
 Personnel$Month <- as.Date(cut(Personnel$Date_Out, breaks = "month"))
 
-ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01")], aes(Month, Shifts)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
+ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10)) 
 
-ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Short-term Sick"], aes(Month, Shifts)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
+ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1) & Reason == "Short-term Sick"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10)) 
 
-ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Long-term Sick"], aes(Month, Shifts)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) 
+ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1) & Reason == "Long-term Sick"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
 
-ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Short-term Injured"], aes(Month, Shifts)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1) & Reason == "Short-term Injured"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
 
-ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Long-term Injured"], aes(Month, Shifts)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1) & Reason == "Long-term Injured"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
 
-ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Personal Day"], aes(Month, Shifts)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1) & Reason == "Personal Day"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
 
-ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Vacation Day"], aes(Month, Shifts)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1) & Reason == "Vacation Day"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
 
-ggplot(Personnel[Date_Out >= as.Date("2012-01-01") & Date_Out < as.Date("2016-01-01") & Reason == "Vacation Week"], aes(Month, Shifts)) +
-  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason))
+ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1) & Reason == "Vacation Week"], aes(Month, Shifts)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
 
 
 
