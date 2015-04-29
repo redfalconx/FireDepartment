@@ -330,25 +330,25 @@ setnames(Personnel_sum, names(Personnel_sum), gsub(" |-", "_", names(Personnel_s
 
 
 #### Plot it! ####
-lime_green = "#2ecc71"
-soft_blue = "#3498db"
-pinkish_red = "#e74c3c"
-purple = "#9b59b6"
-teele = "#1abc9c"
-nice_blue = "#2980b9"
+#lime_green = "#2ecc71"
+#soft_blue = "#3498db"
+#pinkish_red = "#e74c3c"
+#purple = "#9b59b6"
+#teele = "#1abc9c"
+#nice_blue = "#2980b9"
 
-my.theme <- 
-  theme(#plot.background = element_rect(fill="white"), # Remove background
-    panel.grid.major = element_blank(), # Remove gridlines
-    # panel.grid.minor = element_blank(), # Remove more gridlines
-    # panel.border = element_blank(), # Remove border
-    # panel.background = element_blank(), # Remove more background
-    axis.ticks = element_blank(), # Remove axis ticks
-    axis.text=element_text(size=6), # Enlarge axis text font
-    axis.title=element_text(size=8), # Enlarge axis title font
-    plot.title=element_text(size=12) # Enlarge, left-align title
-    ,axis.text.x = element_text(angle=60, hjust = 1) # Uncomment if X-axis unreadable 
-  )
+#my.theme <- 
+#  theme(#plot.background = element_rect(fill="white"), # Remove background
+#    panel.grid.major = element_blank(), # Remove gridlines
+#    # panel.grid.minor = element_blank(), # Remove more gridlines
+#    # panel.border = element_blank(), # Remove border
+#    # panel.background = element_blank(), # Remove more background
+#    axis.ticks = element_blank(), # Remove axis ticks
+#    axis.text=element_text(size=6), # Enlarge axis text font
+#    axis.title=element_text(size=8), # Enlarge axis title font
+#    plot.title=element_text(size=12) # Enlarge, left-align title
+#    ,axis.text.x = element_text(angle=60, hjust = 1) # Uncomment if X-axis unreadable 
+#  )
 
 
 
