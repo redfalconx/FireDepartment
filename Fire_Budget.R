@@ -104,6 +104,11 @@ ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday
   scale_x_date(breaks = pretty_breaks(10)) + 
   scale_y_continuous(labels = dollar) # This turns it back into $ money for the plot
 
+ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Cost)) +
+  stat_summary(fun.y = sum, geom = "line") + 
+  scale_x_date(breaks = pretty_breaks(10)) +
+  scale_y_continuous(labels = dollar) # This turns it back into $ money for the plot
+
 ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Hours_Worked)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + 
   scale_x_date(breaks = pretty_breaks(10))
@@ -112,4 +117,7 @@ ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday
   stat_summary(fun.y = sum, geom = "bar", aes(colour = Reason)) + 
   scale_x_date(breaks = pretty_breaks(10))
 
+ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Hours_Worked)) +
+  stat_summary(fun.y = sum, geom = "line") + 
+  scale_x_date(breaks = pretty_breaks(10))
 
