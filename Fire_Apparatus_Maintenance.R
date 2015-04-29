@@ -49,5 +49,16 @@ Repairs_requested = Maintenance %>%
   summarise(Count = n_distinct(ID)) %>%
   arrange(year, month)
 
+# Plot it!
 
+Maintenance$Month <- as.Date(cut(Maintenance$Date, breaks = "month"))
 
+# Plot of average time to complete repairs by the month the repair was completed
+ggplot(Maintenance[as.Date(Date_Completed) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date_Completed) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Time_to_Complete)) +
+  stat_summary(fun.y = mean, geom = "line") + 
+  scale_x_date(breaks = pretty_breaks(10))
+
+# Plot of average time to complete repairs by the month the repair request was made
+ggplot(Maintenance[as.Date(Notified_Shop) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Notified_Shop) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Time_to_Complete)) +
+  stat_summary(fun.y = mean, geom = "line") + 
+  scale_x_date(breaks = pretty_breaks(10))
