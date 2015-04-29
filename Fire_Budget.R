@@ -55,18 +55,41 @@ Overtime$Reason[Overtime$Reason == 21] <- "Staff Meetings"
 # Closes the connection
 close(channel)
 
-# Get sum totals by month by reason
-Overtime_sum = Overtime %>% 
+# Get sum totals for cost by month by reason
+Overtime_Cost_sum = Overtime %>% 
   group_by(year = year(Date), month = month(Date)) %>% 
   summarise(Cost = sum(Cost)) %>%
   arrange(year, month)
 
-# Sum of all reasons
-Overtime_sum_Reasons = Overtime %>% 
+# Sum of cost of all reasons
+Overtime_Cost_sum_Reasons = Overtime %>% 
   group_by(year = year(Date), month = month(Date), Reason) %>% 
   summarise(Cost = sum(Cost)) %>%
   spread(Reason, Cost, fill = 0) %>%
   arrange(year, month)
+
+# Get the sum of cost for the fiscal year
+Overtime_Cost_FY_sum = Overtime %>% 
+  filter(as.Date(Date) >= as.Date("2014-07-01") & as.Date(Date) < as.Date("2015-07-01")) %>%
+  summarise(Cost = sum(Cost))
+
+# Get sum totals for hours by month by reason
+Overtime_Hours_sum = Overtime %>% 
+  group_by(year = year(Date), month = month(Date)) %>% 
+  summarise(Hours = sum(Hours_Worked)) %>%
+  arrange(year, month)
+
+# Sum of hours of all reasons
+Overtime_Hours_sum_Reasons = Overtime %>% 
+  group_by(year = year(Date), month = month(Date), Reason) %>% 
+  summarise(Hours = sum(Hours_Worked)) %>%
+  spread(Reason, Hours, fill = 0) %>%
+  arrange(year, month)
+
+# Get the sum of hours for the fiscal year
+Overtime_Hours_FY_sum = Overtime %>% 
+  filter(as.Date(Date) >= as.Date("2014-07-01") & as.Date(Date) < as.Date("2015-07-01")) %>%
+  summarise(Hours = sum(Hours_Worked))
 
 # Plot it!
 Overtime$Month <- as.Date(cut(Overtime$Date, breaks = "month"))
@@ -80,4 +103,13 @@ ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday
   stat_summary(fun.y = sum, geom = "bar", aes(colour = Reason)) + 
   scale_x_date(breaks = pretty_breaks(10)) + 
   scale_y_continuous(labels = dollar) # This turns it back into $ money for the plot
+
+ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Hours_Worked)) +
+  stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + 
+  scale_x_date(breaks = pretty_breaks(10))
+
+ggplot(Overtime[as.Date(Date) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Date) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Hours_Worked)) +
+  stat_summary(fun.y = sum, geom = "bar", aes(colour = Reason)) + 
+  scale_x_date(breaks = pretty_breaks(10))
+
 
