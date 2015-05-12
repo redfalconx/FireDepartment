@@ -31,11 +31,8 @@ close(channel)
 setnames(Maintenance, names(Maintenance), gsub(" ", "_", names(Maintenance)))
 
 # Add Time_to_Complete and Age_of_Vehicle columns
-Maintenance$Time_to_Complete <- ifelse(!is.na(Maintenance$Date_Completed), difftime(Maintenance$Date_Completed, Maintenance$Notified_Shop, units = "days"), 0)
+Maintenance$Time_to_Complete <- ifelse(!is.na(Maintenance$Date_Completed) & difftime(Maintenance$Date_Completed, Maintenance$Notified_Shop, units = "days") > 0, difftime(Maintenance$Date_Completed, Maintenance$Notified_Shop, units = "days"), 0)
 Maintenance$Age_of_Vehicle <- year(Maintenance$Notified_Shop) - Maintenance$Year_of_Vehicle
-
-# Only use data where Time_to_Complete is positive
-Maintenance <- Maintenance[Maintenance$Time_to_Complete >= 0]
 
 # Get average time and count of completed repairs by month
 Repairs_avg_count = Maintenance %>% 
@@ -62,3 +59,4 @@ ggplot(Maintenance[as.Date(Date_Completed) >= ((Sys.Date()-395) - as.POSIXlt(Sys
 ggplot(Maintenance[as.Date(Notified_Shop) >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & as.Date(Notified_Shop) < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Time_to_Complete)) +
   stat_summary(fun.y = mean, geom = "line") + 
   scale_x_date(breaks = pretty_breaks(10))
+
