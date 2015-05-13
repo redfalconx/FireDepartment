@@ -247,7 +247,7 @@ close(channel)
 
 
 #### Fetch the Vacation Weeks table from the Excel spreadsheet and put the results in a dataframe ####
-VacationWeeks <- read_excel("//fileshare1/Departments/Fire/FireStat/FireStat Workbook - Personnel and Budget.xlsx", "Vacation Weeks")
+VacationWeeks <- read_excel("P:/Somerstat Data/Fire/Ongoing Analyses/FireStat Workbook - Personnel and Budget.xlsx", "Vacation Weeks")
 
 # Include only necessary columns
 VacationWeeks <- VacationWeeks[, c(1,3,4)]
@@ -301,12 +301,17 @@ VacationWeeks_count = VacationWeeks %>%
 PLE <- Personnel[complete.cases(Personnel),]
 setorder(PLE, Employee_ID, Date_Out)
 
-# Set up PLE column, then use a for loop and if statements to calculate
+# Set up PLE column, then vectorize and fill in PLE$PLE. Basically, it acts like if statements to calculate
 PLE$PLE <- 0
-for (i in 2:nrow(PLE)) {
-  if(PLE$Employee_ID[i] == PLE$Employee_ID[i+1] & PLE$Reason[i] != PLE$Reason[i+1] & PLE$Date_Out[i+1] - PLE$Date_Out[i] <= 4 & PLE$Reason[i] == "Short-term Sick" & PLE$Reason[i+1] != "Long-term Sick") PLE$PLE[i] = 1 else 
-      if(PLE$Employee_ID[i] == PLE$Employee_ID[i-1] & PLE$Reason[i] != PLE$Reason[i-1] & PLE$Date_Out[i] - PLE$Date_Out[i-1] <= 4 & PLE$Reason[i] == "Short-term Sick" & PLE$Reason[i-1] != "Long-term Sick") PLE$PLE[i] = 1 else
-          0 }
+n <- nrow(PLE)
+PLE$PLE[2:(n-1)] <- as.numeric((PLE$Employee_ID[2:(n-1)] == PLE$Employee_ID[3:n] & PLE$Reason[2:(n-1)] != PLE$Reason[3:n] & PLE$Date_Out[3:n] - PLE$Date_Out[2:(n-1)] <= 4 & PLE$Reason[2:(n-1)] == "Short-term Sick" & PLE$Reason[3:n] != "Long-term Sick") |
+                               (PLE$Employee_ID[2:(n-1)] == PLE$Employee_ID[1:(n-2)] & PLE$Reason[2:(n-1)] != PLE$Reason[1:(n-2)] & PLE$Date_Out[2:(n-1)] - PLE$Date_Out[1:(n-2)] <= 4 & PLE$Reason[2:(n-1)] == "Short-term Sick" & PLE$Reason[1:(n-2)] != "Long-term Sick"))
+
+## Old for loop that still works but is very, very slow
+# for (i in 2:nrow(PLE)) {
+#  if(PLE$Employee_ID[i] == PLE$Employee_ID[i+1] & PLE$Reason[i] != PLE$Reason[i+1] & PLE$Date_Out[i+1] - PLE$Date_Out[i] <= 4 & PLE$Reason[i] == "Short-term Sick" & PLE$Reason[i+1] != "Long-term Sick") PLE$PLE[i] = 1 else 
+#    if(PLE$Employee_ID[i] == PLE$Employee_ID[i-1] & PLE$Reason[i] != PLE$Reason[i-1] & PLE$Date_Out[i] - PLE$Date_Out[i-1] <= 4 & PLE$Reason[i] == "Short-term Sick" & PLE$Reason[i-1] != "Long-term Sick") PLE$PLE[i] = 1 else
+#      0 }
 
 # Find the total sum
 sum(PLE$PLE)
