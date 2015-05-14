@@ -330,8 +330,10 @@ PLE_sum_Employee = PLE %>%
   filter(PLE > 0) %>%
   group_by(year = year(Date_Out), month = month(Date_Out), Employee_ID) %>% 
   summarise(Total_PLE = sum(PLE)) %>%
-  spread(Employee_ID, Total_PLE) %>%
+  spread(Employee_ID, Total_PLE, fill = 0) %>%
   arrange(year, month)
+
+PLE_sum_Employee_totals <- data.frame(colSums(PLE_sum_Employee))
 
 # Find the sum of all Reasons
 Personnel_sum = Personnel %>% 
