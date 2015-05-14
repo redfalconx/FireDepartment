@@ -325,6 +325,14 @@ PLE_sum = PLE %>%
   summarise(Total_PLE = sum(PLE)) %>%
   arrange(year, month)
 
+# Find the sum of PLE by month by Employee_ID
+PLE_sum_Employee = PLE %>% 
+  filter(PLE > 0) %>%
+  group_by(year = year(Date_Out), month = month(Date_Out), Employee_ID) %>% 
+  summarise(Total_PLE = sum(PLE)) %>%
+  spread(Employee_ID, Total_PLE) %>%
+  arrange(year, month)
+
 # Find the sum of all Reasons
 Personnel_sum = Personnel %>% 
   group_by(year = year(Date_Out), month = month(Date_Out), Reason) %>% 
@@ -358,6 +366,7 @@ setnames(Personnel_sum, names(Personnel_sum), gsub(" |-", "_", names(Personnel_s
 
 
 Personnel$Month <- as.Date(cut(Personnel$Date_Out, breaks = "month"))
+PLE$Month <- as.Date(cut(PLE$Date_Out, breaks = "month"))
 
 ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10)) 
@@ -383,6 +392,6 @@ ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1
 ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1) & Reason == "Vacation Week"], aes(Month, Shifts)) +
   stat_summary(fun.y = sum, geom = "line", aes(colour = Reason)) + scale_x_date(breaks = pretty_breaks(10))
 
-
-
+ggplot(PLE[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, PLE)) +
+  stat_summary(fun.y = sum, geom = "line") + scale_x_date(breaks = pretty_breaks(10))
   
