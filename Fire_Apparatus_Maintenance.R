@@ -34,16 +34,24 @@ setnames(Maintenance, names(Maintenance), gsub(" ", "_", names(Maintenance)))
 Maintenance$Time_to_Complete <- ifelse(!is.na(Maintenance$Date_Completed) & difftime(Maintenance$Date_Completed, Maintenance$Notified_Shop, units = "days") > 0, difftime(Maintenance$Date_Completed, Maintenance$Notified_Shop, units = "days"), 0)
 Maintenance$Age_of_Vehicle <- year(Maintenance$Notified_Shop) - Maintenance$Year_of_Vehicle
 
+# Add Urgency column for Critical/Non-Critical repairs
+# Maintenance$Urgency <- ifelse(Maintenance$Type_of_Repair > 7, "Critical", "Non-critical")
+# Maintenance$Urgency[is.na(Maintenance$Urgency)] <- "Non-critical"
+
 # Get average time and count of completed repairs by month
 Repairs_avg_count = Maintenance %>% 
-  group_by(year = year(Date_Completed), month = month(Date_Completed)) %>% 
+  group_by(year = year(Date_Completed), month = month(Date_Completed), #Urgency
+           ) %>% 
   summarise(Time_to_Complete = mean(Time_to_Complete), Count = n_distinct(ID)) %>%
+  # spread(Urgency, Count) %>%
   arrange(year, month)
 
 # Take the count of the repair requests by month
 Repairs_requested = Maintenance %>% 
-  group_by(year = year(Notified_Shop), month = month(Notified_Shop)) %>% 
+  group_by(year = year(Notified_Shop), month = month(Notified_Shop), #Urgency
+           ) %>% 
   summarise(Count = n_distinct(ID)) %>%
+  # spread(Urgency, Count) %>%
   arrange(year, month)
 
 # Plot it!
