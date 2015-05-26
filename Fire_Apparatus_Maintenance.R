@@ -35,12 +35,14 @@ Maintenance$Time_to_Complete <- ifelse(!is.na(Maintenance$Date_Completed) & diff
 Maintenance$Age_of_Vehicle <- year(Maintenance$Notified_Shop) - Maintenance$Year_of_Vehicle
 
 # Add Urgency column for Critical/Non-Critical repairs
-# Maintenance$Urgency <- ifelse(Maintenance$Type_of_Repair > 7, "Critical", "Non-critical")
+# Need to find out what category each type of repair is first before implementing
+# Maintenance$Urgency[Maintenance$Type_of_Repair > 7] <- "Critical"
+# Maintenance$Urgency[Maintenance$Type_of_Repair <= 7] <- "Non-critical"
 # Maintenance$Urgency[is.na(Maintenance$Urgency)] <- "Non-critical"
 
 # Get average time and count of completed repairs by month
 Repairs_avg_count = Maintenance %>% 
-  group_by(year = year(Date_Completed), month = month(Date_Completed), #Urgency
+  group_by(year = year(Date_Completed), month = month(Date_Completed) #, Urgency
            ) %>% 
   summarise(Time_to_Complete = mean(Time_to_Complete), Count = n_distinct(ID)) %>%
   # spread(Urgency, Count) %>%
@@ -48,7 +50,7 @@ Repairs_avg_count = Maintenance %>%
 
 # Take the count of the repair requests by month
 Repairs_requested = Maintenance %>% 
-  group_by(year = year(Notified_Shop), month = month(Notified_Shop), #Urgency
+  group_by(year = year(Notified_Shop), month = month(Notified_Shop) #, Urgency
            ) %>% 
   summarise(Count = n_distinct(ID)) %>%
   # spread(Urgency, Count) %>%
