@@ -1,6 +1,6 @@
 # Created by Andrew Russell, 2015.
 # These packages are used at various points: 
-# install.packages("RODBC", "data.table", "readxl", "dplyr", "tidyr", "ggplot2", "scales")
+# install.packages("RODBC", "data.table", "readxl", "dplyr", "tidyr", "ggplot2", "scales", "weatherData")
 
 #### Load packages ####
 library(RODBC)
@@ -10,6 +10,7 @@ library(dplyr) # data manipulation
 library(tidyr) # a few pivot-table functions
 library(ggplot2) # plotting  
 library(scales) # works with ggplot2 to properly label axes on plots
+library(weatherData) # gets weather data
 
 # Connect to Access db
 channel <- odbcConnectAccess("//fileshare1/Departments/Fire/OFFICE/SFDRECORDS/SFD 2012")
@@ -397,3 +398,44 @@ ggplot(Personnel[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1
 ggplot(PLE[Date_Out >= ((Sys.Date()-395) - as.POSIXlt(Sys.Date())$mday + 1) & Date_Out < (Sys.Date() - as.POSIXlt(Sys.Date())$mday + 1)], aes(Month, PLE)) +
   stat_summary(fun.y = sum, geom = "line") + scale_x_date(breaks = pretty_breaks(10))
   
+
+# Find the count by day for all Reasons
+Personnel_count = Personnel %>% 
+  group_by(Date_Out) %>% 
+  summarise(Count = n_distinct(Employee_ID)) %>%
+  arrange(Date_Out)
+
+
+# Find the count by day by Reason
+Personnel_count_reasons = Personnel %>% 
+  group_by(Date_Out, Reason) %>% 
+  summarise(Count = n_distinct(Employee_ID)) %>%
+  spread(Reason, Count, fill = 0) %>%
+  arrange(Date_Out)
+
+# Retrieve weather data from BOS airport weather data
+# Data can only retrieve so much at once, so it needs to be separated into years
+bos1 <- getWeatherForDate("BOS", start_date="2011-01-01", end_date = "2011-12-31", opt_custom_columns = TRUE, custom_columns = c(2,3,4,22))
+bos2 <- getWeatherForDate("BOS", start_date="2012-01-01", end_date = "2012-12-31", opt_custom_columns = TRUE, custom_columns = c(2,3,4,22))
+bos3 <- getWeatherForDate("BOS", start_date="2013-01-01", end_date = "2013-12-31", opt_custom_columns = TRUE, custom_columns = c(2,3,4,22))
+bos4 <- getWeatherForDate("BOS", start_date="2014-01-01", end_date = "2014-12-31", opt_custom_columns = TRUE, custom_columns = c(2,3,4,22))
+bos5 <- getWeatherForDate("BOS", start_date="2015-01-01", end_date = as.character(Sys.Date()), opt_custom_columns = TRUE, custom_columns = c(2,3,4,22))
+
+# Bind weather data together
+w <- rbind(bos1, bos2, bos3, bos4, bos5)
+setnames(w, "Date", "Date_Out")
+w$Date_Out <- as.Date(w$Date_Out)
+
+# Merge weather data with personnel_count and personnel_count_reasons
+Personnel_count = left_join(Personnel_count, w, by = "Date_Out", copy = T)
+Personnel_count_reasons = left_join(Personnel_count_reasons, w, by = "Date_Out", copy = T)
+Personnel_count <- Personnel_count[complete.cases(Personnel_count$Max_TemperatureF),]
+Personnel_count_reasons <- Personnel_count_reasons[complete.cases(Personnel_count_reasons$Max_TemperatureF),]
+
+# Take some correlations
+cor(Personnel_count$Count, Personnel_count$Max_TemperatureF)
+cor(Personnel_count$Count, Personnel_count$Mean_TemperatureF)
+cor(Personnel_count$Count, Personnel_count$Min_TemperatureF)
+
+
+
