@@ -413,8 +413,9 @@ Personnel_count_reasons = Personnel %>%
   spread(Reason, Count, fill = 0) %>%
   arrange(Date_Out)
 
-# Retrieve weather data from BOS airport weather data
+#### Retrieve weather data from BOS airport weather data ####
 # Data can only retrieve so much at once, so it needs to be separated into years
+# This area still needs some work to determine importance of weather data
 bos1 <- getWeatherForDate("BOS", start_date="2011-01-01", end_date = "2011-12-31", opt_custom_columns = TRUE, custom_columns = c(2,3,4,22))
 bos2 <- getWeatherForDate("BOS", start_date="2012-01-01", end_date = "2012-12-31", opt_custom_columns = TRUE, custom_columns = c(2,3,4,22))
 bos3 <- getWeatherForDate("BOS", start_date="2013-01-01", end_date = "2013-12-31", opt_custom_columns = TRUE, custom_columns = c(2,3,4,22))
@@ -431,11 +432,13 @@ Personnel_count = left_join(Personnel_count, w, by = "Date_Out", copy = T)
 Personnel_count_reasons = left_join(Personnel_count_reasons, w, by = "Date_Out", copy = T)
 Personnel_count <- Personnel_count[complete.cases(Personnel_count$Max_TemperatureF),]
 Personnel_count_reasons <- Personnel_count_reasons[complete.cases(Personnel_count_reasons$Max_TemperatureF),]
+setnames(Personnel_count_reasons, names(Personnel_count_reasons), gsub(" |-", "_", names(Personnel_count_reasons)))
 
 # Take some correlations
 cor(Personnel_count$Count, Personnel_count$Max_TemperatureF)
 cor(Personnel_count$Count, Personnel_count$Mean_TemperatureF)
 cor(Personnel_count$Count, Personnel_count$Min_TemperatureF)
-
-
+cor(Personnel_count_reasons$Short_term_Sick, Personnel_count_reasons$Max_TemperatureF)
+cor(Personnel_count_reasons$Short_term_Sick, Personnel_count_reasons$Mean_TemperatureF)
+cor(Personnel_count_reasons$Short_term_Sick, Personnel_count_reasons$Min_TemperatureF)
 
