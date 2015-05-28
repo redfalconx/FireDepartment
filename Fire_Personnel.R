@@ -3,9 +3,9 @@
 # install.packages("RODBC", "data.table", "readxl", "dplyr", "tidyr", "ggplot2", "scales", "weatherData")
 
 #### Load packages ####
-library(RODBC)
-library(data.table)
-library(readxl)
+library(RODBC) # gets data from Access
+library(data.table) # converts to data tables
+library(readxl) # reads Excel files
 library(dplyr) # data manipulation
 library(tidyr) # a few pivot-table functions
 library(ggplot2) # plotting  
